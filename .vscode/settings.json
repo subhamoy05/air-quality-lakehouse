@@ -1,0 +1,19 @@
+{
+	"workbench.editorAssociations": {
+		"*.copilotmd": "vscode.markdown.preview.editor",
+		"*.parquet": "duckdb.dataFileViewer",
+		"*.csv": "duckdb.dataFileViewer",
+		"*.tsv": "duckdb.dataFileViewer",
+		"*.xlsx": "duckdb.dataFileViewer"
+	},
+	"duckdb.defaultDatabase": "air_quality_lakehouse",
+	"duckdb.databases": [
+		{
+			"alias": "air_quality_lakehouse",
+			"type": "file",
+			"path": "c:\\Users\\subha\\OneDrive\\Desktop\\PROJECTS\\Minor project\\air-quality-lakehouse\\database\\air_quality_lakehouse.duckdb",
+			"readOnly": true,
+			"attached": true
+		}
+	]
+}

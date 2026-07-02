@@ -10,9 +10,12 @@ lakehouse/bronze/*
 lakehouse/silver/*
 lakehouse/gold/*
 lakehouse/metadata/*
+reports/analytics/*
+
 
 .venv/*
 # Ignore Python cache
 __pycache__/
 *.py[cod]
 *$py.class
+lakehouse.duckdb

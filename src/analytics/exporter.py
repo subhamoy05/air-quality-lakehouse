@@ -1,132 +1,353 @@
 """
 exporter.py
+===========
 
-Export Analytics Results.
+Computational Environmental Intelligence Framework (CEIF)
 
-Supported Formats
------------------
-1. CSV
-2. Excel
+Analytics Export Utilities
+
+Responsibilities
+----------------
+1. Export CSV
+2. Export Excel
+3. Export JSON
+4. Export HTML
+5. Export Parquet
 """
+
+from __future__ import annotations
 
 from pathlib import Path
 
-from src.analytics.analytics import AnalyticsEngine
+import pandas as pd
 
 
-class AnalyticsExporter:
+class DataExporter:
+    """
+    Generic Data Export Utility.
+    """
 
-    def __init__(self):
+    def __init__(
+        self,
+        output_directory: str | Path = "reports/analytics"
+    ):
 
-        self.engine = AnalyticsEngine()
+        self.output_directory = Path(output_directory)
 
-        self.output_dir = Path("reports")
-
-        self.output_dir.mkdir(
+        self.output_directory.mkdir(
             parents=True,
             exist_ok=True
         )
 
     # =====================================================
-    # Generic Export
+    # CSV
     # =====================================================
 
-    def export_dataframe(
-        self,
-        dataframe,
-        filename
-    ):
+    def to_csv(
 
-        csv_path = self.output_dir / f"{filename}.csv"
-        excel_path = self.output_dir / f"{filename}.xlsx"
+        self,
+
+        dataframe: pd.DataFrame,
+
+        filename: str,
+
+        index: bool = False
+
+    ) -> Path:
+
+        path = self.output_directory / filename
 
         dataframe.to_csv(
-            csv_path,
-            index=False
+
+            path,
+
+            index=index
+
         )
+
+        print(f"CSV Saved : {path}")
+
+        return path
+
+    # =====================================================
+    # Excel
+    # =====================================================
+
+    def to_excel(
+
+        self,
+
+        dataframe: pd.DataFrame,
+
+        filename: str,
+
+        index: bool = False
+
+    ) -> Path:
+
+        path = self.output_directory / filename
 
         dataframe.to_excel(
-            excel_path,
-            index=False
+
+            path,
+
+            index=index
+
         )
 
-        print(f"Saved {csv_path}")
-        print(f"Saved {excel_path}")
+        print(f"Excel Saved : {path}")
+
+        return path
 
     # =====================================================
-    # Export Reports
+    # JSON
     # =====================================================
 
-    def export_average_aqi(self):
+    def to_json(
 
-        df = self.engine.average_aqi_by_station()
+        self,
 
-        self.export_dataframe(
-            df,
-            "average_aqi_by_station"
+        dataframe: pd.DataFrame,
+
+        filename: str,
+
+        orient: str = "records"
+
+    ) -> Path:
+
+        path = self.output_directory / filename
+
+        dataframe.to_json(
+
+            path,
+
+            orient=orient,
+
+            indent=4
+
         )
 
-    def export_daily_aqi(self):
+        print(f"JSON Saved : {path}")
 
-        df = self.engine.daily_aqi()
+        return path
 
-        self.export_dataframe(
-            df,
-            "daily_aqi"
+    # =====================================================
+    # HTML
+    # =====================================================
+
+    def to_html(
+
+        self,
+
+        dataframe: pd.DataFrame,
+
+        filename: str,
+
+        index: bool = False
+
+    ) -> Path:
+
+        path = self.output_directory / filename
+
+        dataframe.to_html(
+
+            path,
+
+            index=index
+
         )
 
-    def export_pm25(self):
+        print(f"HTML Saved : {path}")
 
-        df = self.engine.daily_pm25()
+        return path
 
-        self.export_dataframe(
-            df,
-            "daily_pm25"
+    # =====================================================
+    # Parquet
+    # =====================================================
+
+    def to_parquet(
+
+        self,
+
+        dataframe: pd.DataFrame,
+
+        filename: str,
+
+        index: bool = False
+
+    ) -> Path:
+
+        path = self.output_directory / filename
+
+        dataframe.to_parquet(
+
+            path,
+
+            index=index
+
         )
 
-    def export_pm10(self):
+        print(f"Parquet Saved : {path}")
 
-        df = self.engine.daily_pm10()
+        return path
 
-        self.export_dataframe(
-            df,
-            "daily_pm10"
+    # =====================================================
+    # Export All
+    # =====================================================
+
+    def export_all(
+
+        self,
+
+        dataframe: pd.DataFrame,
+
+        filename: str
+
+    ):
+
+        stem = Path(filename).stem
+
+        self.to_csv(
+
+            dataframe,
+
+            f"{stem}.csv"
+
         )
 
-    def export_weather(self):
+        self.to_excel(
 
-        df = self.engine.temperature_trend()
+            dataframe,
 
-        self.export_dataframe(
-            df,
-            "temperature_trend"
+            f"{stem}.xlsx"
+
+        )
+
+        self.to_json(
+
+            dataframe,
+
+            f"{stem}.json"
+
+        )
+
+        self.to_html(
+
+            dataframe,
+
+            f"{stem}.html"
+
+        )
+
+        self.to_parquet(
+
+            dataframe,
+
+            f"{stem}.parquet"
+
         )
 
     # =====================================================
-
-    def export_all(self):
-
-        self.export_average_aqi()
-
-        self.export_daily_aqi()
-
-        self.export_pm25()
-
-        self.export_pm10()
-
-        self.export_weather()
-
+    # Utility
     # =====================================================
 
-    def close(self):
+    def exists(
 
-        self.engine.close()
+        self,
 
+        filename: str
+
+    ) -> bool:
+
+        return (
+
+            self.output_directory /
+
+            filename
+
+        ).exists()
+
+    def delete(
+
+        self,
+
+        filename: str
+
+    ):
+
+        file = self.output_directory / filename
+
+        if file.exists():
+
+            file.unlink()
+
+            print(f"Deleted : {file}")
+
+    def list_exports(self):
+
+        return sorted(
+
+            self.output_directory.glob("*")
+
+        )
+
+
+# ==========================================================
+# Demo
+# ==========================================================
 
 if __name__ == "__main__":
 
-    exporter = AnalyticsExporter()
+    df = pd.DataFrame({
 
-    exporter.export_all()
+        "Station": [
 
-    exporter.close()
+            "WB001",
+
+            "WB002",
+
+            "WB003"
+
+        ],
+
+        "AQI": [
+
+            95,
+
+            110,
+
+            82
+
+        ],
+
+        "PM25": [
+
+            42.5,
+
+            58.4,
+
+            31.2
+
+        ]
+
+    })
+
+    exporter = DataExporter()
+
+    exporter.export_all(
+
+        df,
+
+        "sample_report"
+
+    )
+
+    print()
+
+    print("Available Exports")
+
+    print(
+
+        exporter.list_exports()
+
+    )

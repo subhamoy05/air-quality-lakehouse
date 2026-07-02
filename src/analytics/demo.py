@@ -1,66 +1,183 @@
 """
 demo.py
+=======
 
-Demonstration of the Analytics Module.
+Computational Environmental Intelligence Framework (CEIF)
 
-This script validates:
+Analytics Engine Demonstration
 
-1. DuckDB connection
-2. AnalyticsEngine
-3. SQL Queries
-4. Plotting utilities
+Runs the complete Analytics Engine.
+
+Usage
+-----
+python -m src.analytics.demo
 """
 
-from src.analytics.analytics import AnalyticsEngine
-from src.analytics.plots import Plotter
+from __future__ import annotations
+
+from .analytics import AnalyticsEngine
+from .eda import ExploratoryDataAnalysis
+from .correlation import CorrelationAnalysis
+from .trends import TrendAnalysis
+from .plots import Visualization
+from .reports import AnalyticsReportGenerator
 
 
 def main():
 
-    engine = AnalyticsEngine()
+    print("=" * 80)
+    print("COMPUTATIONAL ENVIRONMENTAL INTELLIGENCE FRAMEWORK")
+    print("Analytics Engine Demo")
+    print("=" * 80)
 
-    print("=" * 70)
-    print("ENVIRONMENTAL ANALYTICS DEMO")
-    print("=" * 70)
+    # =====================================================
+    # Analytics Engine
+    # =====================================================
 
-    # --------------------------------------------------
-    print("\nLoading Daily AQI...")
-    daily_aqi = engine.daily_aqi()
-    print(daily_aqi.head())
+    analytics = AnalyticsEngine()
 
-    Plotter.aqi_trend(daily_aqi)
+    print("\nDataset Information")
+    print("-" * 80)
+    print(analytics.dataset_info())
 
-    # --------------------------------------------------
-    print("\nLoading Daily PM2.5...")
-    pm25 = engine.daily_pm25()
-    print(pm25.head())
+    print("\nStation List")
+    print("-" * 80)
+    print(analytics.station_list().head())
 
-    Plotter.pm25_trend(pm25)
+    print("\nAverage AQI")
+    print("-" * 80)
+    print(analytics.average_aqi())
 
-    # --------------------------------------------------
-    print("\nLoading Daily PM10...")
-    pm10 = engine.daily_pm10()
-    print(pm10.head())
+    print("\nStation Ranking")
+    print("-" * 80)
+    print(analytics.station_ranking().head())
 
-    Plotter.pm10_trend(pm10)
+    print("\nWeather Summary")
+    print("-" * 80)
+    print(analytics.weather_summary())
 
-    # --------------------------------------------------
-    print("\nLoading Station Summary...")
-    stations = engine.average_aqi_by_station()
-    print(stations.head())
+    # =====================================================
+    # EDA
+    # =====================================================
 
-    Plotter.station_comparison(stations)
+    eda = ExploratoryDataAnalysis()
 
-    # --------------------------------------------------
-    print("\nLoading Correlation Dataset...")
-    corr = engine.aqi_weather()
+    print("\nEDA")
+    print("-" * 80)
 
-    Plotter.correlation_heatmap(corr)
+    print("Shape")
+    print(eda.shape())
 
-    engine.close()
+    print("\nMissing Values")
+    print(eda.missing_values().head())
 
-    print("\nDemo completed successfully.")
+    print("\nDuplicate Records")
+    print(eda.duplicate_records())
+
+    # =====================================================
+    # Correlation
+    # =====================================================
+
+    correlation = CorrelationAnalysis()
+
+    print("\nCorrelation Matrix")
+    print("-" * 80)
+
+    print(correlation.correlation_matrix())
+
+    print("\nAQI Feature Ranking")
+    print(correlation.feature_ranking())
+
+    # =====================================================
+    # Trends
+    # =====================================================
+
+    trends = TrendAnalysis()
+
+    print("\nDaily AQI")
+    print("-" * 80)
+
+    daily = trends.daily()
+
+    print(daily.head())
+
+    print("\nMonthly AQI")
+    print("-" * 80)
+
+    print(trends.monthly().head())
+
+    # =====================================================
+    # Visualization
+    # =====================================================
+
+    plots = Visualization()
+
+    dataset = analytics.environmental_master()
+
+    print("\nGenerating Visualizations...")
+    print("-" * 80)
+
+    plots.histogram(
+        dataset,
+        "aqi",
+        filename="aqi_histogram.png"
+    )
+
+    plots.box_plot(
+        dataset,
+        "aqi",
+        filename="aqi_boxplot.png"
+    )
+
+    plots.correlation_heatmap(
+        dataset,
+        filename="correlation_heatmap.png"
+    )
+
+    plots.aqi_vs_pm25(
+        dataset,
+        filename="aqi_vs_pm25.png"
+    )
+
+    plots.station_comparison(
+        analytics.station_ranking(),
+        filename="station_comparison.png"
+    )
+
+    plots.aqi_trend(
+        analytics.daily_aqi(),
+        filename="daily_aqi.png"
+    )
+
+    print("Visualization Complete")
+
+    # =====================================================
+    # Reports
+    # =====================================================
+
+    print("\nGenerating Reports...")
+    print("-" * 80)
+
+    reports = AnalyticsReportGenerator()
+
+    reports.generate_all_reports()
+
+    print("Reports Generated")
+
+    # =====================================================
+    # Close
+    # =====================================================
+
+    analytics.close()
+    eda.close()
+    correlation.close()
+    trends.close()
+
+    print("\n" + "=" * 80)
+    print("Analytics Engine Completed Successfully")
+    print("=" * 80)
 
 
 if __name__ == "__main__":
+
     main()

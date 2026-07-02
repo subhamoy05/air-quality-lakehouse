@@ -1,280 +1,843 @@
 """
 plots.py
+========
 
-Reusable Plotting Module
-------------------------
+Computational Environmental Intelligence Framework (CEIF)
+
+Visualization Utilities
 
 Responsibilities
 ----------------
-1. AQI Trend
-2. PM2.5 Trend
-3. PM10 Trend
-4. Temperature Trend
-5. Humidity Trend
-6. Station Comparison
-7. Correlation Heatmap
-8. Generic Time Series Plot
-
-Author:
-Environmental Intelligence Lakehouse
+1. Line Plots
+2. Bar Plots
+3. Scatter Plots
+4. Histograms
+5. Boxplots
+6. Save Figures
 """
 
-from typing import Optional
+from __future__ import annotations
+
+from pathlib import Path
 
 import matplotlib.pyplot as plt
-import seaborn as sns
 import pandas as pd
-
-# ------------------------------------------------------------------
-# Plot Style
-# ------------------------------------------------------------------
-
-sns.set_theme(style="whitegrid")
-plt.rcParams["figure.figsize"] = (12, 6)
-plt.rcParams["font.size"] = 11
+import seaborn as sns
 
 
-class Plotter:
+class Visualization:
     """
-    Reusable plotting utilities.
+    Visualization Utility Class.
     """
 
-    # ==========================================================
-    # Generic Time Series
-    # ==========================================================
-
-    @staticmethod
-    def timeseries(
-        df: pd.DataFrame,
-        x: str,
-        y: str,
-        title: str,
-        xlabel: Optional[str] = None,
-        ylabel: Optional[str] = None,
-        color: str = "royalblue"
+    def __init__(
+        self,
+        output_directory: str = "reports/plots"
     ):
 
-        plt.figure()
+        self.output_directory = Path(output_directory)
+
+        self.output_directory.mkdir(
+            parents=True,
+            exist_ok=True
+        )
+
+        sns.set_theme(
+            style="whitegrid",
+            palette="deep"
+        )
+
+    # =====================================================
+    # Helper
+    # =====================================================
+
+    def _save(
+        self,
+        filename: str
+    ):
+
+        path = self.output_directory / filename
+
+        plt.tight_layout()
+
+        plt.savefig(
+            path,
+            dpi=300,
+            bbox_inches="tight"
+        )
+
+        plt.close()
+
+        print(f"Saved -> {path}")
+
+    # =====================================================
+    # Line Plot
+    # =====================================================
+
+    def line_plot(
+
+        self,
+
+        dataframe: pd.DataFrame,
+
+        x: str,
+
+        y: str,
+
+        title: str,
+
+        xlabel: str,
+
+        ylabel: str,
+
+        filename: str
+
+    ):
+
+        plt.figure(figsize=(12,6))
 
         sns.lineplot(
-            data=df,
+
+            data=dataframe,
+
             x=x,
+
             y=y,
-            color=color,
+
             linewidth=2
+
         )
 
         plt.title(title)
 
-        plt.xlabel(xlabel or x)
-        plt.ylabel(ylabel or y)
+        plt.xlabel(xlabel)
 
-        plt.tight_layout()
-        plt.show()
+        plt.ylabel(ylabel)
 
-    # ==========================================================
-    # AQI Trend
-    # ==========================================================
+        self._save(filename)
 
-    @staticmethod
-    def aqi_trend(df):
+    # =====================================================
+    # Bar Plot
+    # =====================================================
 
-        Plotter.timeseries(
-            df=df,
-            x="date",
-            y="average_aqi",
-            title="Average AQI Trend",
-            ylabel="AQI",
-            color="firebrick"
-        )
+    def bar_plot(
 
-    # ==========================================================
-    # PM2.5 Trend
-    # ==========================================================
+        self,
 
-    @staticmethod
-    def pm25_trend(df):
+        dataframe: pd.DataFrame,
 
-        Plotter.timeseries(
-            df=df,
-            x="date",
-            y="average_pm25",
-            title="PM2.5 Trend",
-            ylabel="PM2.5",
-            color="darkorange"
-        )
+        x: str,
 
-    # ==========================================================
-    # PM10 Trend
-    # ==========================================================
+        y: str,
 
-    @staticmethod
-    def pm10_trend(df):
+        title: str,
 
-        Plotter.timeseries(
-            df=df,
-            x="date",
-            y="average_pm10",
-            title="PM10 Trend",
-            ylabel="PM10",
-            color="forestgreen"
-        )
+        xlabel: str,
 
-    # ==========================================================
-    # Temperature Trend
-    # ==========================================================
+        ylabel: str,
 
-    @staticmethod
-    def temperature_trend(df):
+        filename: str
 
-        Plotter.timeseries(
-            df=df,
-            x="date",
-            y="average_temperature",
-            title="Temperature Trend",
-            ylabel="Temperature (°C)",
-            color="tomato"
-        )
-
-    # ==========================================================
-    # Humidity Trend
-    # ==========================================================
-
-    @staticmethod
-    def humidity_trend(df):
-
-        Plotter.timeseries(
-            df=df,
-            x="date",
-            y="average_humidity",
-            title="Humidity Trend",
-            ylabel="Humidity (%)",
-            color="steelblue"
-        )
-
-    # ==========================================================
-    # Station Comparison
-    # ==========================================================
-
-    @staticmethod
-    def station_comparison(
-        df: pd.DataFrame,
-        x: str = "station_name",
-        y: str = "average_aqi"
     ):
 
-        plt.figure(figsize=(14, 6))
+        plt.figure(figsize=(12,6))
 
         sns.barplot(
-            data=df,
+
+            data=dataframe,
+
             x=x,
+
+            y=y
+
+        )
+
+        plt.xticks(rotation=45)
+
+        plt.title(title)
+
+        plt.xlabel(xlabel)
+
+        plt.ylabel(ylabel)
+
+        self._save(filename)
+
+    # =====================================================
+    # Scatter Plot
+    # =====================================================
+
+    def scatter_plot(
+
+        self,
+
+        dataframe: pd.DataFrame,
+
+        x: str,
+
+        y: str,
+
+        title: str,
+
+        xlabel: str,
+
+        ylabel: str,
+
+        filename: str
+
+    ):
+
+        plt.figure(figsize=(10,6))
+
+        sns.scatterplot(
+
+            data=dataframe,
+
+            x=x,
+
             y=y,
-            palette="viridis"
+
+            alpha=0.6
+
+        )
+
+        plt.title(title)
+
+        plt.xlabel(xlabel)
+
+        plt.ylabel(ylabel)
+
+        self._save(filename)
+
+    # =====================================================
+    # Histogram
+    # =====================================================
+
+    def histogram(
+
+        self,
+
+        dataframe: pd.DataFrame,
+
+        column: str,
+
+        bins: int = 30,
+
+        filename: str = "histogram.png"
+
+    ):
+
+        plt.figure(figsize=(10,6))
+
+        sns.histplot(
+
+            dataframe[column],
+
+            bins=bins,
+
+            kde=True
+
+        )
+
+        plt.title(
+
+            f"{column} Distribution"
+
+        )
+
+        plt.xlabel(column)
+
+        plt.ylabel("Frequency")
+
+        self._save(filename)
+
+    # =====================================================
+    # Box Plot
+    # =====================================================
+
+    def box_plot(
+
+        self,
+
+        dataframe: pd.DataFrame,
+
+        column: str,
+
+        filename: str = "boxplot.png"
+
+    ):
+
+        plt.figure(figsize=(8,6))
+
+        sns.boxplot(
+
+            y=dataframe[column]
+
+        )
+
+        plt.title(
+
+            f"{column} Box Plot"
+
+        )
+
+        self._save(filename)
+
+    # =====================================================
+    # Correlation Heatmap
+    # =====================================================
+
+    def correlation_heatmap(
+
+        self,
+
+        dataframe: pd.DataFrame,
+
+        filename: str = "correlation_heatmap.png"
+
+    ):
+
+        plt.figure(figsize=(12,10))
+
+        corr = dataframe.corr(
+            numeric_only=True
+        )
+
+        sns.heatmap(
+
+            corr,
+
+            annot=True,
+
+            fmt=".2f",
+
+            cmap="coolwarm",
+
+            square=True,
+
+            linewidths=0.5
+
+        )
+
+        plt.title("Correlation Matrix")
+
+        self._save(filename)
+
+    # =====================================================
+    # AQI Trend
+    # =====================================================
+
+    def aqi_trend(
+
+        self,
+
+        dataframe: pd.DataFrame,
+
+        filename: str = "aqi_trend.png"
+
+    ):
+
+        self.line_plot(
+
+            dataframe,
+
+            x="date",
+
+            y="average_aqi",
+
+            title="Daily AQI Trend",
+
+            xlabel="Date",
+
+            ylabel="Average AQI",
+
+            filename=filename
+
+        )
+
+    # =====================================================
+    # PM2.5 Trend
+    # =====================================================
+
+    def pm25_trend(
+
+        self,
+
+        dataframe: pd.DataFrame,
+
+        filename: str = "pm25_trend.png"
+
+    ):
+
+        self.line_plot(
+
+            dataframe,
+
+            x="date",
+
+            y="average_pm25",
+
+            title="Daily PM2.5 Trend",
+
+            xlabel="Date",
+
+            ylabel="Average PM2.5",
+
+            filename=filename
+
+        )
+
+    # =====================================================
+    # PM10 Trend
+    # =====================================================
+
+    def pm10_trend(
+
+        self,
+
+        dataframe: pd.DataFrame,
+
+        filename: str = "pm10_trend.png"
+
+    ):
+
+        self.line_plot(
+
+            dataframe,
+
+            x="date",
+
+            y="average_pm10",
+
+            title="Daily PM10 Trend",
+
+            xlabel="Date",
+
+            ylabel="Average PM10",
+
+            filename=filename
+
+        )
+
+    # =====================================================
+    # Temperature Trend
+    # =====================================================
+
+    def temperature_trend(
+
+        self,
+
+        dataframe: pd.DataFrame,
+
+        filename: str = "temperature_trend.png"
+
+    ):
+
+        self.line_plot(
+
+            dataframe,
+
+            x="date",
+
+            y="average_temperature",
+
+            title="Temperature Trend",
+
+            xlabel="Date",
+
+            ylabel="Temperature (°C)",
+
+            filename=filename
+
+        )
+
+    # =====================================================
+    # Humidity Trend
+    # =====================================================
+
+    def humidity_trend(
+
+        self,
+
+        dataframe: pd.DataFrame,
+
+        filename: str = "humidity_trend.png"
+
+    ):
+
+        self.line_plot(
+
+            dataframe,
+
+            x="date",
+
+            y="average_humidity",
+
+            title="Humidity Trend",
+
+            xlabel="Date",
+
+            ylabel="Humidity (%)",
+
+            filename=filename
+
+        )
+
+    # =====================================================
+    # Pressure Trend
+    # =====================================================
+
+    def pressure_trend(
+
+        self,
+
+        dataframe: pd.DataFrame,
+
+        filename: str = "pressure_trend.png"
+
+    ):
+
+        self.line_plot(
+
+            dataframe,
+
+            x="date",
+
+            y="average_pressure",
+
+            title="Pressure Trend",
+
+            xlabel="Date",
+
+            ylabel="Pressure (hPa)",
+
+            filename=filename
+
+        )
+
+    # =====================================================
+    # Wind Speed Trend
+    # =====================================================
+
+    def wind_speed_trend(
+
+        self,
+
+        dataframe: pd.DataFrame,
+
+        filename: str = "wind_speed_trend.png"
+
+    ):
+
+        self.line_plot(
+
+            dataframe,
+
+            x="date",
+
+            y="average_wind_speed",
+
+            title="Wind Speed Trend",
+
+            xlabel="Date",
+
+            ylabel="Wind Speed (km/h)",
+
+            filename=filename
+
+        )
+
+    # =====================================================
+    # Station Comparison
+    # =====================================================
+
+    def station_comparison(
+
+        self,
+
+        dataframe: pd.DataFrame,
+
+        value_column: str = "average_aqi",
+
+        filename: str = "station_comparison.png"
+
+    ):
+
+        plt.figure(figsize=(14,7))
+
+        sns.barplot(
+
+            data=dataframe,
+
+            x="station_name",
+
+            y=value_column
+
         )
 
         plt.xticks(rotation=90)
 
         plt.title("Station Comparison")
 
-        plt.tight_layout()
+        plt.xlabel("Station")
 
-        plt.show()
+        plt.ylabel(value_column.replace("_", " ").title())
 
-    # ==========================================================
-    # Correlation Heatmap
-    # ==========================================================
+        self._save(filename)
 
-    @staticmethod
-    def correlation_heatmap(df: pd.DataFrame):
+    # =====================================================
+    # AQI vs PM2.5
+    # =====================================================
 
-        plt.figure(figsize=(10, 8))
+    def aqi_vs_pm25(
 
-        numeric = df.select_dtypes(include="number")
+        self,
 
-        sns.heatmap(
-            numeric.corr(),
-            annot=True,
-            cmap="coolwarm",
-            linewidths=0.5,
-            fmt=".2f"
-        )
+        dataframe: pd.DataFrame,
 
-        plt.title("Correlation Heatmap")
+        filename: str = "aqi_vs_pm25.png"
 
-        plt.tight_layout()
-
-        plt.show()
-
-    # ==========================================================
-    # Histogram
-    # ==========================================================
-
-    @staticmethod
-    def histogram(
-        df: pd.DataFrame,
-        column: str,
-        bins: int = 30
     ):
 
-        plt.figure()
+        self.scatter_plot(
 
-        sns.histplot(
-            df[column],
-            bins=bins,
-            kde=True,
-            color="royalblue"
+            dataframe,
+
+            x="pm25",
+
+            y="aqi",
+
+            title="AQI vs PM2.5",
+
+            xlabel="PM2.5",
+
+            ylabel="AQI",
+
+            filename=filename
+
         )
 
-        plt.title(f"{column} Distribution")
+    # =====================================================
+    # AQI vs PM10
+    # =====================================================
 
-        plt.tight_layout()
+    def aqi_vs_pm10(
 
-        plt.show()
+        self,
 
-    # ==========================================================
-    # Box Plot
-    # ==========================================================
+        dataframe: pd.DataFrame,
 
-    @staticmethod
-    def boxplot(
-        df: pd.DataFrame,
-        column: str
+        filename: str = "aqi_vs_pm10.png"
+
     ):
 
-        plt.figure()
+        self.scatter_plot(
 
-        sns.boxplot(
-            y=df[column],
-            color="lightgreen"
+            dataframe,
+
+            x="pm10",
+
+            y="aqi",
+
+            title="AQI vs PM10",
+
+            xlabel="PM10",
+
+            ylabel="AQI",
+
+            filename=filename
+
         )
 
-        plt.title(f"{column} Boxplot")
+    # =====================================================
+    # AQI vs Temperature
+    # =====================================================
 
-        plt.tight_layout()
+    def aqi_vs_temperature(
 
-        plt.show()
+        self,
 
-    # ==========================================================
-    # Scatter Plot
-    # ==========================================================
+        dataframe: pd.DataFrame,
 
-    @staticmethod
-    def scatter(
-        df: pd.DataFrame,
+        filename: str = "aqi_vs_temperature.png"
+
+    ):
+
+        self.scatter_plot(
+
+            dataframe,
+
+            x="temperature",
+
+            y="aqi",
+
+            title="AQI vs Temperature",
+
+            xlabel="Temperature (°C)",
+
+            ylabel="AQI",
+
+            filename=filename
+
+        )
+
+    # =====================================================
+    # AQI vs Humidity
+    # =====================================================
+
+    def aqi_vs_humidity(
+
+        self,
+
+        dataframe: pd.DataFrame,
+
+        filename: str = "aqi_vs_humidity.png"
+
+    ):
+
+        self.scatter_plot(
+
+            dataframe,
+
+            x="humidity",
+
+            y="aqi",
+
+            title="AQI vs Humidity",
+
+            xlabel="Humidity (%)",
+
+            ylabel="AQI",
+
+            filename=filename
+
+        )
+
+    # =====================================================
+    # AQI vs Pressure
+    # =====================================================
+
+    def aqi_vs_pressure(
+
+        self,
+
+        dataframe: pd.DataFrame,
+
+        filename: str = "aqi_vs_pressure.png"
+
+    ):
+
+        self.scatter_plot(
+
+            dataframe,
+
+            x="pressure",
+
+            y="aqi",
+
+            title="AQI vs Pressure",
+
+            xlabel="Pressure",
+
+            ylabel="AQI",
+
+            filename=filename
+
+        )
+
+    # =====================================================
+    # Multi-Line Plot
+    # =====================================================
+
+    def multi_line_plot(
+
+        self,
+
+        dataframe: pd.DataFrame,
+
         x: str,
-        y: str
+
+        y_columns: list,
+
+        title: str,
+
+        filename: str
+
     ):
 
-        plt.figure()
+        plt.figure(figsize=(14,7))
 
-        sns.scatterplot(
-            data=df,
-            x=x,
-            y=y
+        for column in y_columns:
+
+            plt.plot(
+
+                dataframe[x],
+
+                dataframe[column],
+
+                linewidth=2,
+
+                label=column
+
+            )
+
+        plt.legend()
+
+        plt.title(title)
+
+        plt.xlabel(x)
+
+        plt.ylabel("Value")
+
+        self._save(filename)
+
+    # =====================================================
+    # Forecast Plot
+    # =====================================================
+
+    def forecast_plot(
+
+        self,
+
+        actual,
+
+        predicted,
+
+        filename: str = "forecast.png"
+
+    ):
+
+        plt.figure(figsize=(12,6))
+
+        plt.plot(
+
+            actual,
+
+            label="Actual",
+
+            linewidth=2
+
         )
 
-        plt.title(f"{x} vs {y}")
+        plt.plot(
 
-        plt.tight_layout()
+            predicted,
 
-        plt.show()
+            label="Predicted",
+
+            linewidth=2
+
+        )
+
+        plt.legend()
+
+        plt.title("Forecast vs Actual")
+
+        self._save(filename)
+
+    # =====================================================
+    # Available Plot Directory
+    # =====================================================
+
+    def output_path(self):
+
+        return self.output_directory
